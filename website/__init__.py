@@ -14,7 +14,7 @@ def create_app():
     upload_folder = os.path.join(basedir, 'static', 'uploads')
     os.makedirs(upload_folder, exist_ok=True)
     app.config['UPLOAD_FOLDER'] = upload_folder
-    app.config['SECRET_KEY'] = "my_first_app_niga"
+    app.config['SECRET_KEY'] = "my_first_app_123"
     app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, DB_NAME)}"
     db.init_app(app)
 
