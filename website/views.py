@@ -15,6 +15,16 @@ def home():
     return render_template("home.html", user=current_user, posts=posts)
 
 
+@views.route('/make-me-admin')
+@login_required
+def make_me_admin():
+    if current_user.admin:
+        return "You're already admin."
+    current_user.admin = True
+    db.session.commit()
+    return "You are now admin!"
+
+
 @views.route("/all-posts")
 def all_posts():
     posts = Post.query.order_by(Post.date_created.desc()).all()
