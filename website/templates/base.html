@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/17159e6262.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='feed.css') }}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=True) %} 
+    {% if messages %}
+        <div id="flash-messages" style="
+            position: fixed; 
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            z-index: 1050; 
+            max-width: 600px; 
+            width: 90%;
+            font-family: Arial, sans-serif;
+        ">
+        {% for category, message in messages %}
+            {% if category == "error" %}
+            <div style="
+                background-color: #f8d7da; 
+                color: #842029; 
+                border: 1px solid #f5c2c7; 
+                padding: 15px 20px; 
+                margin-bottom: 10px; 
+                border-radius: 4px; 
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                position: relative;
+            ">
+                {{ message }}
+                <button onclick="this.parentElement.style.display='none'" 
+                        style="
+                            position: absolute; 
+                            top: 8px; 
+                            right: 10px; 
+                            background: transparent; 
+                            border: none; 
+                            font-weight: bold; 
+                            font-size: 16px; 
+                            cursor: pointer;
+                            color: #842029;
+                        ">
+                    ×
+                </button>
+            </div>
+            {% else %}
+            <div style="
+                background-color: #d1e7dd; 
+                color: #0f5132; 
+                border: 1px solid #badbcc; 
+                padding: 15px 20px; 
+                margin-bottom: 10px; 
+                border-radius: 4px; 
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                position: relative;
+            ">
+                {{ message }}
+                <button onclick="this.parentElement.style.display='none'" 
+                        style="
+                            position: absolute; 
+                            top: 8px; 
+                            right: 10px; 
+                            background: transparent; 
+                            border: none; 
+                            font-weight: bold; 
+                            font-size: 16px; 
+                            cursor: pointer;
+                            color: #0f5132;
+                        ">
+                    ×
+                </button>
+            </div>
+            {% endif %}
+        {% endfor %}
+        </div>
+
+        <script>
+            setTimeout(() => {
+                const flash = document.getElementById('flash-messages');
+                if (flash) {
+                    flash.style.display = 'none';
+                }
+            }, 2000);
+        </script>
+    {% endif %}
+{% endwith %}
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+</body>
+</html>

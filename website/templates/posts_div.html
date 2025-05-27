@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="sidebar">
+        <div class="sidebar-item active" onclick="loadAllPosts()">
+            <img src="{{ url_for('static', filename='icons/sidebar_gym.png') }}" alt="Home icon" class="sidebar-icon">
+            <span class="sidebar-label">Home</span>
+        </div>
+        <div class="sidebar-item" onclick="filterByTag('diet')">
+            <img src="{{ url_for('static', filename='icons/sidebar_diet.png') }}" alt="Diet icon" class="sidebar-icon">
+            <span class="sidebar-label">Diet</span>
+        </div>
+        <div class="sidebar-item" onclick="filterByTag('deadlift')">
+            <img src="{{ url_for('static', filename='icons/sidebar_deadlift.png') }}" alt="Deadlift icon" class="sidebar-icon">
+            <span class="sidebar-label">Deadlift</span>
+        </div>
+        <div class="sidebar-item" onclick="filterByTag('squat')">
+            <img src="{{ url_for('static', filename='icons/sidebar_squat.png') }}" alt="Squat icon" class="sidebar-icon">
+            <span class="sidebar-label">Squat</span>
+        </div>
+        <div class="sidebar-item" onclick="filterByTag('bench')">
+            <img src="{{ url_for('static', filename='icons/sidebar_bench.png') }}" alt="Bench icon" class="sidebar-icon">
+            <span class="sidebar-label">Bench</span>
+        </div>
+        <div class="sidebar-item sidebar-profile-icon" onclick="Profile()">
+            <img src="{{ url_for('static', filename='icons/profile_icon.png') }}" alt="Profile icon" class="sidebar-icon">
+            <span class="sidebar-label">Profile</span>
+        </div>
+    </div>
+
+    
+
+    <div class="feed">
+        <div id="posts">
+            {% for post in posts %}
+            <div class="post">
+                <div class="post-inner">
+                    <div class="post-header">
+                        <div>
+                            <a href="/posts/{{post.user.username}}" class="username">{{post.user.username}}</a>&nbsp;
+                            <small><span class="comment-date">{{ post.date_created|timeago }} </span> </small>
+                        </div>
+                        
+                        <div class="post-controls">
+                            {% if user.id == post.author %}
+                                <div class="menu">
+                                    <a href="/edit-post/{{ post.id }}" class="menu-item">
+                                        <img src="{{ url_for('static', filename='icons/edit_icon.png') }}" alt="Edit" class="icon-btn" />
+                                    </a>
+                                    
+                                    <a href="/delete-post/{{ post.id }}" class="menu-item">
+                                        <img src="{{ url_for('static', filename='icons/trash_icon.png') }}" alt="Delete" class="icon-btn" />
+                                    </a>
+                                    
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+        
+                    <div class="post-body">
+                        <p class="post-text">{{ post.text }}</p>
+                        {% if post.image %}
+                        <div class="post-image-container">
+                            
+                            <div class="post-image">
+                                <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="Post Image">
+                            </div>
+                            
+
+                            <div class="post-reactions" data-has-image="true"> 
+                                <img 
+                                src="{{ url_for('static', filename='icons/' + ('heart_full_icon.png' if user.id in post.likes|map(attribute='author')|list else 'heart_empty_white_icon.png')) }}" 
+                                alt="Like" 
+                                class="like-button-img" 
+                                id="like-button-{{post.id}}" 
+                                onclick="like('{{post.id}}')"/>
+                            </div>
+
+
+                        </div>
+                        {% else %}
+                        
+
+                        <div class="post-reactions-no-image" data-has-image="false"> 
+                            <img 
+                            src="{{ url_for('static', filename='icons/' + ('heart_full_icon.png' if user.id in post.likes|map(attribute='author')|list else 'heart_empty_icon.png')) }}" 
+                            alt="Like" 
+                            class="like-button-img" 
+                            id="like-button-{{post.id}}" 
+                            onclick="like('{{post.id}}')"/>
+                        </div>
+
+                        {% endif %}
+                        <div class="post-meta">
+                            <small>
+                            <span class="post-likes-count" id="post-likes-count-{{ post.id }}">{{ post.likes|length }} likes</span>, 
+                            <span class="post-comments-count" id="post-comments-count-{{ post.id }}">{{ post.comments|length }} comments</span>
+                            </small>
+                          </div>
+
+                        <!-- Comments -->
+        
+                        <div class="comments-section" id="comments-section-{{ post.id }}">
+                            <div class="comments-list" id="comments-list-{{ post.id }}">
+                              {% for comment in post.comments %}
+
+                              <div class="comment{% if loop.index > 2 %} hidden{% endif %}" id="comment-{{ comment.id }}" data-index="{{ loop.index0 }}">
+                                <div class="comment-outer">
+                                    <div class="comment-inner1">
+                                        <div class="comment-inner1-1">
+                                            <span class="comment-user">
+                                                <a class="comment-user1" href="/posts/{{comment.user.username}}">{{comment.user.username}}</a>:
+                                            </span>
+                                            
+                                            <span class="comment-text">{{ comment.text }}</span>
+                                            <br>
+                                            <div class="comment-inner1-1-footer">
+                                                <small>
+                                                <span class="comment-likes-count" id="comment-likes-count-{{ comment.id }}">{{ comment.likes|length }} likes</span>, 
+                                                <span class="comment-date">{{ comment.date_created|timeago }} </span> 
+                                                </small>   
+                                            </div>      
+                                        </div>
+                                        <!-- Comment Like Button -->
+                                        <div class="comment-like-controls">
+                                            <img 
+                                                src="{{ url_for('static', filename='icons/' + ('heart_full_icon.png' if user.id in comment.likes|map(attribute='author')|list else 'heart_empty_icon.png')) }}" 
+                                                alt="Like" 
+                                                class="comment-like-button" 
+                                                id="comment-like-button-{{ comment.id }}" 
+                                                onclick="likeComment('{{ comment.id }}')"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="comment-inner2">
+                                        {% if user.id == comment.author or user.id == post.author %}
+                                        <img src="{{ url_for('static', filename='icons/trash_icon.png') }}" 
+                                            alt="Delete" 
+                                            class="comment-delete-icon" 
+                                            onclick="deleteComment('{{comment.id}}')" />
+                                    {% endif %}
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                              {% endfor %}
+                              {% if post.comments|length > 2 %}
+                            <div class="comment-load-more">
+                              <a href="javascript:void(0);" onclick="loadMoreComments('{{ post.id }}')">View more comments</a>
+                            </div>
+                            {% endif %}
+                            </div>
+                        </div>
+                          
+                          <!-- Comment Form -->
+                          <form method="POST" action="/create-comment/{{post.id}}" class="comment-form" onsubmit="return submitComment('{{post.id}}', this)">
+                            <div class="comment-input-wrapper">
+                              <input type="text" name="text" placeholder="Comment something!" class="comment-input" />
+                              <button type="submit" class="comment-submit">
+                                <img src="{{ url_for('static', filename='icons/send_icon.png') }}" alt="Send" class="send-icon">
+                              </button>
+                            </div>
+                          </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    
+
+    <div class="profile">
+        {% if user.is_authenticated %}
+          <p>Username: @{{ user.username }}</p>
+          <p>Posts Liked: {{ user.likes|length }}</p>
+          <p>Comments Made: {{ user.comments|length }}</p>
+          <a class="nav-item nav-link" href="/logout">Logout</a>
+      
+          {% if user.admin %}
+            <div class="create-post-button">
+              <a href="/create-post"><button>Create a Post</button></a>
+            </div>
+          {% endif %}
+      
+        {% else %}
+          <a class="nav-item nav-link" href="/login">Login</a>
+          <a class="nav-item nav-link" href="/register">Register</a>
+        {% endif %}
+      </div>
+  </div>
+
+
+
+
+{% block footer %}
+    
+{% endblock %}
+
+{% endblock %}
